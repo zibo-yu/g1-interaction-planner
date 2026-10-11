@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "g1-mujoco-playback"
+version = "0.1.0"
+description = "Minimal Unitree G1 MuJoCo playback/debug harness for planner development."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mujoco>=3.3.0",
+    "mujoco-menagerie>=2026.9.0",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+video = [
+    "imageio>=2.34",
+    "imageio-ffmpeg>=0.5",
+]
+dev = [
+    "pytest>=8",
+]
+
+[project.scripts]
+g1-inspect = "g1_playback.inspect_model:main"
+g1-demo = "g1_playback.demo:main"
+g1-play = "g1_playback.play_npz:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
