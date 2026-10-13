@@ -1,0 +1,29 @@
+test_distant_target_drives_body_and_hand (test_mpc.ClosedLoopTests.test_distant_target_drives_body_and_hand) ... ok
+test_infeasible_target_reports_remaining_error_without_reach_violation (test_mpc.ClosedLoopTests.test_infeasible_target_reports_remaining_error_without_reach_violation) ... ok
+test_near_target_reaches_without_substantial_pelvis_motion (test_mpc.ClosedLoopTests.test_near_target_reaches_without_substantial_pelvis_motion) ... ok
+test_replanning_corrects_slower_plant (test_mpc.ClosedLoopTests.test_replanning_corrects_slower_plant) ... ok
+test_configuration_round_trip (test_mpc.GeometryAndContractTests.test_configuration_round_trip) ... ok
+test_invalid_geometry_is_rejected (test_mpc.GeometryAndContractTests.test_invalid_geometry_is_rejected) ... ok
+test_invalid_quaternion_is_rejected (test_mpc.GeometryAndContractTests.test_invalid_quaternion_is_rejected) ... ok
+test_nan_target_is_rejected (test_mpc.GeometryAndContractTests.test_nan_target_is_rejected) ... ok
+test_palm_mapping_has_explicit_geometry (test_mpc.GeometryAndContractTests.test_palm_mapping_has_explicit_geometry) ... ok
+test_tip_offset_rotates_with_wrist (test_mpc.GeometryAndContractTests.test_tip_offset_rotates_with_wrist) ... ok
+test_active_requires_target_and_rejects_angular_motion (test_mpc.PlannerTests.test_active_requires_target_and_rejects_angular_motion) ... ok
+test_all_requested_pose_channels_and_geometry_are_exported (test_mpc.PlannerTests.test_all_requested_pose_channels_and_geometry_are_exported) ... ok
+test_event_latches_and_termination_has_priority (test_mpc.PlannerTests.test_event_latches_and_termination_has_priority) ... ok
+test_hard_bounds_hold_on_entire_interpolated_horizon (test_mpc.PlannerTests.test_hard_bounds_hold_on_entire_interpolated_horizon) ... ok
+test_inactive_holds_stationary_robot (test_mpc.PlannerTests.test_inactive_holds_stationary_robot) ... ok
+test_initial_state_is_measured_state (test_mpc.PlannerTests.test_initial_state_is_measured_state) ... ok
+test_moving_termination_brakes_without_instantaneous_freeze (test_mpc.PlannerTests.test_moving_termination_brakes_without_instantaneous_freeze) ... ok
+test_near_target_increases_velocity_penalty_continuously (test_mpc.PlannerTests.test_near_target_increases_velocity_penalty_continuously) ... ok
+test_nonviable_outward_motion_fails_instead_of_exporting_bad_plan (test_mpc.PlannerTests.test_nonviable_outward_motion_fails_instead_of_exporting_bad_plan) ... ok
+test_outside_initial_reach_and_overspeed_are_rejected (test_mpc.PlannerTests.test_outside_initial_reach_and_overspeed_are_rejected) ... ok
+test_problem_is_convex_and_parameter_cacheable (test_mpc.PlannerTests.test_problem_is_convex_and_parameter_cacheable) ... ok
+test_sampling_matches_double_integrator_and_endpoint (test_mpc.PlannerTests.test_sampling_matches_double_integrator_and_endpoint) ... ok
+test_stale_future_and_wrong_frame_inputs_are_rejected (test_mpc.PlannerTests.test_stale_future_and_wrong_frame_inputs_are_rejected) ... ok
+test_stationary_termination_locks_pelvis_and_retracts (test_mpc.PlannerTests.test_stationary_termination_locks_pelvis_and_retracts) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 7.482s
+
+OK

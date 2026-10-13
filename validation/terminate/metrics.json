@@ -1,0 +1,29 @@
+{
+  "scenario": "terminate",
+  "duration_s": 11.999999999999973,
+  "mpc_updates": 120,
+  "plant_acceleration_scale": 1.0,
+  "terminated_at_s": 8.0,
+  "final_objective_error_m": 7.309559122349882e-05,
+  "final_pelvis_displacement_m": 1.4999637808653683,
+  "max_measured_pelvis_wrist_distance_m": 0.727265989149881,
+  "max_predicted_constraint_violation": 7.28407530958819e-08,
+  "max_pelvis_speed_mps": 0.4500000513181568,
+  "max_wrist_speed_mps": 0.6500000165518798,
+  "solve_wall_ms_first": 70.78704000014113,
+  "solve_wall_ms_median_after_first": 12.735101000089344,
+  "solve_wall_ms_p95_after_first": 19.82366660008665,
+  "solver_status_counts": {
+    "optimal": 120
+  },
+  "pelvis_movement_after_termination_m": 3.63551796788232e-06,
+  "final_pelvis_speed_mps": 3.7500693131124965e-12,
+  "behavior_checks": {
+    "hard_constraints": true,
+    "measured_reach": true,
+    "objective_behavior": true,
+    "body_approaches": true,
+    "stationary_root_stays_approximately_fixed": true
+  },
+  "all_checks_pass": true
+}

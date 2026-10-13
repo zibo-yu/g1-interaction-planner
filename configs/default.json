@@ -1,0 +1,58 @@
+{
+  "dt_s": 0.1,
+  "horizon_steps": 30,
+  "frame_id": "planner_world",
+  "pelvis_height_m": 0.95,
+  "fixed_heading_rad": 0.0,
+  "fixed_wrist_orientation_xyzw": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "wrist_to_tip_local_m": [
+    0.0,
+    0.0,
+    0.12
+  ],
+  "pelvis_to_torso_local_m": [
+    0.0,
+    0.25,
+    0.0
+  ],
+  "neutral_wrist_local_m": [
+    0.22,
+    -0.2,
+    0.05
+  ],
+  "comfort_center_local_m": [
+    0.22,
+    0.2,
+    0.29
+  ],
+  "comfort_half_widths_m": [
+    0.14,
+    0.18,
+    0.29
+  ],
+  "max_pelvis_wrist_distance_m": 0.8,
+  "pelvis_speed_max_mps": 0.45,
+  "wrist_speed_max_mps": 0.65,
+  "pelvis_acceleration_max_mps2": 0.65,
+  "wrist_acceleration_max_mps2": 1.2,
+  "hand_tracking_weight": 240.0,
+  "terminal_hand_tracking_weight": 1800.0,
+  "comfort_weight": 800.0,
+  "pelvis_displacement_weight": 35.0,
+  "pelvis_velocity_weight": 15.0,
+  "pelvis_acceleration_weight": 1.0,
+  "wrist_acceleration_weight": 0.1,
+  "acceleration_change_weight": 0.25,
+  "wrist_velocity_far_weight": 0.4,
+  "wrist_velocity_near_weight": 35.0,
+  "precontact_scale_m": 0.14,
+  "max_target_age_s": 0.5,
+  "target_prediction_cap_s": 0.6,
+  "feasibility_tolerance": 2e-05,
+  "solver_max_iterations": 150
+}

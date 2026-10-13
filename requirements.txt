@@ -1,0 +1,7 @@
+# Python 3.11-3.13, 64-bit. Python 3.12 is recommended.
+# Direct dependency versions used for the delivered numerical validation.
+numpy==2.3.5
+scipy==1.17.0
+cvxpy==1.9.3
+clarabel==0.11.1
+matplotlib==3.10.8

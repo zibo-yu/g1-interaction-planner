@@ -1,0 +1,197 @@
+{
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "numpy": "2.3.5",
+    "cvxpy": "1.9.3",
+    "clarabel": "0.11.1"
+  },
+  "all_checks_pass": true,
+  "scenarios": [
+    {
+      "scenario": "near",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": null,
+      "final_objective_error_m": 1.7314110718174122e-11,
+      "final_pelvis_displacement_m": 1.7776160745015181e-09,
+      "max_measured_pelvis_wrist_distance_m": 0.5646237671677203,
+      "max_predicted_constraint_violation": 2.6017212828577385e-08,
+      "max_pelvis_speed_mps": 8.500023719512029e-10,
+      "max_wrist_speed_mps": 0.6499999982444242,
+      "solve_wall_ms_first": 62.35119300004044,
+      "solve_wall_ms_median_after_first": 13.32568399993761,
+      "solve_wall_ms_p95_after_first": 17.916454300052465,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true,
+        "little_pelvis_motion": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "far",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": null,
+      "final_objective_error_m": 2.936035263820197e-07,
+      "final_pelvis_displacement_m": 1.5000067867527493,
+      "max_measured_pelvis_wrist_distance_m": 0.727265989149881,
+      "max_predicted_constraint_violation": 7.28407530958819e-08,
+      "max_pelvis_speed_mps": 0.4500000513181568,
+      "max_wrist_speed_mps": 0.6500000165518798,
+      "solve_wall_ms_first": 74.56773600006272,
+      "solve_wall_ms_median_after_first": 14.221827000028497,
+      "solve_wall_ms_p95_after_first": 19.989051199991078,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true,
+        "body_approaches": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "moving",
+      "duration_s": 15.99999999999996,
+      "mpc_updates": 160,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": null,
+      "final_objective_error_m": 0.006363201733061542,
+      "final_pelvis_displacement_m": 0.8774181482238647,
+      "max_measured_pelvis_wrist_distance_m": 0.7215200587137242,
+      "max_predicted_constraint_violation": 1.2164585971863318e-07,
+      "max_pelvis_speed_mps": 0.44999999913075656,
+      "max_wrist_speed_mps": 0.6500000981944691,
+      "solve_wall_ms_first": 68.72550699995372,
+      "solve_wall_ms_median_after_first": 13.604694999912681,
+      "solve_wall_ms_p95_after_first": 17.806515499819398,
+      "solver_status_counts": {
+        "optimal": 160
+      },
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "terminate",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": 8.0,
+      "final_objective_error_m": 7.309559122349882e-05,
+      "final_pelvis_displacement_m": 1.4999637808653683,
+      "max_measured_pelvis_wrist_distance_m": 0.727265989149881,
+      "max_predicted_constraint_violation": 7.28407530958819e-08,
+      "max_pelvis_speed_mps": 0.4500000513181568,
+      "max_wrist_speed_mps": 0.6500000165518798,
+      "solve_wall_ms_first": 70.78704000014113,
+      "solve_wall_ms_median_after_first": 12.735101000089344,
+      "solve_wall_ms_p95_after_first": 19.82366660008665,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "pelvis_movement_after_termination_m": 3.63551796788232e-06,
+      "final_pelvis_speed_mps": 3.7500693131124965e-12,
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true,
+        "body_approaches": true,
+        "stationary_root_stays_approximately_fixed": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "moving_terminate",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": 1.5,
+      "final_objective_error_m": 4.76738016488395e-12,
+      "final_pelvis_displacement_m": 0.5745004594382168,
+      "max_measured_pelvis_wrist_distance_m": 0.4947906243011733,
+      "max_predicted_constraint_violation": 4.5287017469419766e-08,
+      "max_pelvis_speed_mps": 0.44999999947765673,
+      "max_wrist_speed_mps": 0.6499999995768742,
+      "solve_wall_ms_first": 66.07914200003506,
+      "solve_wall_ms_median_after_first": 8.00229399987984,
+      "solve_wall_ms_p95_after_first": 21.706837600140716,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "pelvis_movement_after_termination_m": 0.15599999779931473,
+      "final_pelvis_speed_mps": 3.748949792986948e-12,
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true,
+        "moving_root_brakes": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "mismatch",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 0.8,
+      "terminated_at_s": null,
+      "final_objective_error_m": 2.394573048180188e-09,
+      "final_pelvis_displacement_m": 1.5003142780652394,
+      "max_measured_pelvis_wrist_distance_m": 0.7352218347921151,
+      "max_predicted_constraint_violation": 3.56349659780264e-08,
+      "max_pelvis_speed_mps": 0.4500000004456386,
+      "max_wrist_speed_mps": 0.649999901916562,
+      "solve_wall_ms_first": 65.33206399990377,
+      "solve_wall_ms_median_after_first": 13.553267000133928,
+      "solve_wall_ms_p95_after_first": 19.5822423998834,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true,
+        "body_approaches": true
+      },
+      "all_checks_pass": true
+    },
+    {
+      "scenario": "unreachable",
+      "duration_s": 11.999999999999973,
+      "mpc_updates": 120,
+      "plant_acceleration_scale": 1.0,
+      "terminated_at_s": null,
+      "final_objective_error_m": 0.6691647602642827,
+      "final_pelvis_displacement_m": 0.1553026553243285,
+      "max_measured_pelvis_wrist_distance_m": 0.7786340817089099,
+      "max_predicted_constraint_violation": 5.703863510397866e-07,
+      "max_pelvis_speed_mps": 0.016746020867646986,
+      "max_wrist_speed_mps": 0.6500000042140684,
+      "solve_wall_ms_first": 57.92032199997266,
+      "solve_wall_ms_median_after_first": 16.86053000003085,
+      "solve_wall_ms_p95_after_first": 21.52958560011484,
+      "solver_status_counts": {
+        "optimal": 120
+      },
+      "behavior_checks": {
+        "hard_constraints": true,
+        "measured_reach": true,
+        "objective_behavior": true
+      },
+      "all_checks_pass": true
+    }
+  ]
+}

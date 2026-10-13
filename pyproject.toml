@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "handshake-mpc-stage1"
+version = "0.1.0"
+description = "Standalone fixed-orientation pelvis/wrist MPC with task-space motion exports"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "numpy>=1.26,<3",
+  "scipy>=1.13,<2",
+  "cvxpy>=1.6,<2",
+  "clarabel>=0.10,<1",
+  "matplotlib>=3.8,<4",
+]
+
+[project.scripts]
+handshake-mpc-demo = "handshake_mpc.demo:main"
+
+[tool.setuptools.packages.find]
+include = ["handshake_mpc*"]

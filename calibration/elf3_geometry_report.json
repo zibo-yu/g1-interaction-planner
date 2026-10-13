@@ -1,0 +1,207 @@
+{
+  "purpose": "ELF3 kinematic proxy for Stage-1 planner; NOT native KiMoDo-SOMA calibration",
+  "source_model": "elf3",
+  "urdf_root_link": "torso_link",
+  "coordinate_transform": {
+    "matrix_elf3_to_planner": [
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "elf3_frame": "Z up, +X forwards, +Y left (inferred from symmetric right/left shoulder frames)",
+    "planner_frame": "Y up, +Z forwards, +X left (right arm is at negative X)",
+    "quaternion_convention": "The planner and robot coordinate axes are rotated bases; orientations need R_planner=M R_elf M^T"
+  },
+  "references": {
+    "virtual_pelvis_definition": "midpoint of l_hip_y_link and r_hip_y_link origins at zero joint angles",
+    "torso_link": "torso_link",
+    "right_wrist_link": "r_wrist_z_link",
+    "right_shoulder_link": "r_shoulder_y_link",
+    "neutral_configuration": "all URDF joint coordinates equal zero; NOT verified to be natural standing pose",
+    "comfort_center_seed_joint_angles_rad": {
+      "r_shoulder_y_joint": -0.55,
+      "r_wrist_y_joint": 0.55
+    }
+  },
+  "urdf_derived": {
+    "virtual_pelvis_in_torso_frame_elf3_m": [
+      0.0,
+      0.0,
+      -0.3825
+    ],
+    "right_shoulder_relative_to_pelvis_planner_m": [
+      -0.178,
+      0.46950000000000003,
+      0.0
+    ],
+    "pelvis_to_torso_local_planner_m": [
+      0.0,
+      0.3825,
+      0.0
+    ],
+    "zero_joint_wrist_relative_to_pelvis_planner_m": [
+      -0.178,
+      0.2135,
+      0.256
+    ],
+    "sample_reach_wrist_relative_to_pelvis_planner_m": [
+      -0.178,
+      0.3850617,
+      0.3520542
+    ],
+    "upper_arm_segment_m": 0.256,
+    "forearm_segment_m": 0.256,
+    "upper_bound_shoulder_to_wrist_m": 0.512,
+    "triangle_inequality_pelvis_to_wrist_bound_m": 1.0141097987492378,
+    "straight_zero_joint_hip_to_ankle_vertical_m": 0.6399999999999999,
+    "torso_to_hip_midpoint_vertical_m": 0.3825,
+    "right_arm_joint_limits": {
+      "r_shoulder_y_joint": {
+        "axis_elf3": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "limit_rad": [
+          -2.8798,
+          2.8798
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          -0.178,
+          0.087
+        ]
+      },
+      "r_shoulder_x_joint": {
+        "axis_elf3": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "limit_rad": [
+          -3.0543,
+          0.34907
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "r_shoulder_z_joint": {
+        "axis_elf3": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "limit_rad": [
+          -2.8798,
+          2.8798
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "r_elbow_y_joint": {
+        "axis_elf3": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "limit_rad": [
+          -0.95993,
+          1.6581
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          0.0,
+          -0.256
+        ]
+      },
+      "r_wrist_x_joint": {
+        "axis_elf3": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "limit_rad": [
+          -2.8798,
+          2.8798
+        ],
+        "origin_xyz_elf3_m": [
+          0.256,
+          0.0,
+          0.0
+        ]
+      },
+      "r_wrist_y_joint": {
+        "axis_elf3": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "limit_rad": [
+          -1.309,
+          1.309
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "r_wrist_z_joint": {
+        "axis_elf3": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "limit_rad": [
+          -0.7854,
+          0.7854
+        ],
+        "origin_xyz_elf3_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "assumptions_not_derived_from_urdf": {
+    "pelvis_height_m": "Set equal to hip-to-ankle separation at URDF q=0, with ankle center at z=0. NOT sole-ground height or measured standing height.",
+    "neutral_wrist_local_m": "Zero-joint FK result; not an ergonomically validated neutral configuration.",
+    "comfort_center_local_m": "One joint-limit-valid FK seed with shoulder_y=-0.55, wrist_y=+0.55 radians, preserving global wrist orientation; not an optimized comfortable pose.",
+    "comfort_half_widths_m": "Retained from original MPC settings. This box is NOT an inverse-kinematic feasible-set certificate.",
+    "wrist_to_tip_local_m": "Retained provisional original value: the two URDFs contain NO wrist-to-tip joint/frame; mesh geometries were NOT supplied.",
+    "fixed_wrist_orientation_xyzw": "Identity from the zero-joint / compensated-reach reference; true handshake orientation remains to be calibrated.",
+    "max_pelvis_wrist_distance_m": "Retained original hard radius; smaller than the nominal fixed-torso geometric upper bound, but is NOT sufficient for reachability.",
+    "motion_limits": "Retained MPC speed/acceleration limits; URDF revolute effort/velocity limits cannot determine task-space locomotion/acceleration bounds."
+  },
+  "limits_of_use": [
+    "ELF3 and SOMA skeletal geometries are not interchangeable; use this as approximate planning geometry only.",
+    "The URDF files use meshes/hand models that are not included; no contact surface, finger tip or foot sole can be measured.",
+    "Only nominal rigid fixed-waist link geometry is used; true whole-body IK, contact feasibility and motion generation remain unverified.",
+    "Stage 1 holds heading and wrist orientation fixed; retargeted motion may need different constraints.",
+    "The torso is defined as torso_link, whereas the pelvis is a virtual hip midpoint. Do not substitute the torso for KiMoDo Hips."
+  ],
+  "urdf_comparison": "Identical joints, limits, axes and link transformations; differ only in visual/collision wrist mesh paths.",
+  "urdf_files": [
+    "/mnt/data/handshake_mpc_stage1_elf3_proxy/handshake_mpc_stage1/models/elf3.urdf",
+    "/mnt/data/handshake_mpc_stage1_elf3_proxy/handshake_mpc_stage1/models/elf3_hand_mesh.urdf"
+  ]
+}

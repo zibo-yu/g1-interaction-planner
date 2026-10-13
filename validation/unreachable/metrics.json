@@ -1,0 +1,25 @@
+{
+  "scenario": "unreachable",
+  "duration_s": 11.999999999999973,
+  "mpc_updates": 120,
+  "plant_acceleration_scale": 1.0,
+  "terminated_at_s": null,
+  "final_objective_error_m": 0.6691647602642827,
+  "final_pelvis_displacement_m": 0.1553026553243285,
+  "max_measured_pelvis_wrist_distance_m": 0.7786340817089099,
+  "max_predicted_constraint_violation": 5.703863510397866e-07,
+  "max_pelvis_speed_mps": 0.016746020867646986,
+  "max_wrist_speed_mps": 0.6500000042140684,
+  "solve_wall_ms_first": 57.92032199997266,
+  "solve_wall_ms_median_after_first": 16.86053000003085,
+  "solve_wall_ms_p95_after_first": 21.52958560011484,
+  "solver_status_counts": {
+    "optimal": 120
+  },
+  "behavior_checks": {
+    "hard_constraints": true,
+    "measured_reach": true,
+    "objective_behavior": true
+  },
+  "all_checks_pass": true
+}

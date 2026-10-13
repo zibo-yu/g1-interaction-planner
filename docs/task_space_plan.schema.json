@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:handshake-task-space:v1",
+  "title": "Handshake task-space adapter input v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "coordinate_convention",
+    "time_origin_s",
+    "timestamps_s",
+    "relative_times_s",
+    "frame_indices",
+    "sample_rate_hz",
+    "geometry",
+    "trajectories",
+    "diagnostics",
+    "adapter_required"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "handshake_task_space/v1"
+    },
+    "adapter_required": {
+      "const": true
+    },
+    "time_origin_s": {
+      "type": "number"
+    },
+    "timestamps_s": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "number"
+      }
+    },
+    "relative_times_s": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "number"
+      }
+    },
+    "frame_indices": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "sample_rate_hz": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    },
+    "coordinate_convention": {
+      "type": "object",
+      "required": [
+        "frame_id",
+        "up_axis",
+        "initial_forward_axis",
+        "length_unit",
+        "time_unit",
+        "quaternion_order",
+        "rotation_semantics"
+      ],
+      "properties": {
+        "frame_id": {
+          "type": "string"
+        },
+        "up_axis": {
+          "const": "Y"
+        },
+        "initial_forward_axis": {
+          "const": "+Z"
+        },
+        "length_unit": {
+          "const": "m"
+        },
+        "time_unit": {
+          "const": "s"
+        },
+        "quaternion_order": {
+          "const": "xyzw"
+        },
+        "rotation_semantics": {
+          "const": "active_local_to_world"
+        }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "required": [
+        "wrist_to_tip_local_m",
+        "pelvis_to_torso_local_m"
+      ],
+      "properties": {
+        "wrist_to_tip_local_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "pelvis_to_torso_local_m": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "trajectories": {
+      "type": "object",
+      "required": [
+        "pelvis_position_m",
+        "pelvis_orientation_xyzw",
+        "torso_position_m",
+        "torso_orientation_xyzw",
+        "right_wrist_position_m",
+        "right_wrist_orientation_xyzw",
+        "right_hand_tip_position_m",
+        "pelvis_velocity_mps",
+        "right_wrist_velocity_mps"
+      ],
+      "properties": {
+        "pelvis_position_m": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "pelvis_orientation_xyzw": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "torso_position_m": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "torso_orientation_xyzw": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "right_wrist_position_m": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "right_wrist_orientation_xyzw": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        },
+        "right_hand_tip_position_m": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "pelvis_velocity_mps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "right_wrist_velocity_mps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object"
+    }
+  },
+  "description": "All trajectory lengths must equal timestamps_s length. Quaternion unit norms, monotonic timestamps, equal sample spacing when sample_rate_hz is given, and frame_indices matching sample order require semantic validation beyond JSON Schema."
+}

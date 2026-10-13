@@ -1,0 +1,39 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "execution_platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "unit_tests_passed": 24,
+  "unit_tests_total": 24,
+  "demo_scenarios_passed": 7,
+  "demo_scenarios_total": 7,
+  "windows_execution_performed": false,
+  "windows_dependency_check": {
+    "platform": "win_amd64",
+    "python_version": "3.12",
+    "mode": "pip download --only-binary=:all: including transitive dependencies",
+    "passed": true
+  },
+  "versions": {
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "cvxpy": "1.9.3",
+    "clarabel": "0.11.1",
+    "matplotlib": "3.10.8",
+    "osqp": "1.1.3",
+    "scs": "3.3.1",
+    "highspy": "1.15.1",
+    "qdldl": "0.1.9.post1",
+    "sparsediffpy": "0.6.1"
+  },
+  "dense_export_contract_check": "All seven 50 Hz executed JSON exports checked for equal lengths, increasing times, finite arrays, quaternion norms, frame indices and rigid tip offsets.",
+  "setup_script_static_checks": {
+    "passed": true,
+    "launcher_optional": true,
+    "python_candidates": [
+      "py -3.12",
+      "python",
+      "python3"
+    ],
+    "version_and_architecture_check": "Python 3.11\u20133.13, 64-bit",
+    "native_windows_execution_tested": false
+  }
+}
