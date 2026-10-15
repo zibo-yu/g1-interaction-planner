@@ -52,11 +52,19 @@ def _sample(times, values, grid):
 
 
 def prepare(plan_path, output_path, fps=30.0, start_s=0.0, duration_s=4.0,
-            hand_stride=12, max_frames=300):
+            hand_stride=12, max_frames=300, hand_gate_threshold=0.6,
+            hand_start_s=None, root_stride=1, no_hand=False):
+    """Resample executed MPC trajectory and gate hand constraints from reach_gain.
+
+    For legacy V1 files without `scheduling.reach_gain`, retain legacy all-clip
+    hand constraints unless --hand-start-s or --no-hand is specified.
+    """
     if fps <= 0 or duration_s <= 0 or not math.isfinite(fps) or not math.isfinite(duration_s):
         raise ValueError("FPS and duration must be positive and finite")
-    if hand_stride < 1:
-        raise ValueError("hand_stride must be positive")
+    if hand_stride < 1 or root_stride < 1:
+        raise ValueError("hand_stride/root_stride must be positive")
+    if not (0. <= hand_gate_threshold <= 1.):
+        raise ValueError("hand_gate_threshold must be inside [0, 1]")
     times, traj, conv = load_plan(plan_path)
     num_frames = int(round(duration_s * fps))
     if not (2 <= num_frames <= max_frames):
@@ -65,7 +73,34 @@ def prepare(plan_path, output_path, fps=30.0, start_s=0.0, duration_s=4.0,
     if grid[0] < times[0] - 1e-7 or grid[-1] > times[-1] + 1e-7:
         raise ValueError(f"Requested [{grid[0]}, {grid[-1]}] s, outside MPC record [{times[0]}, {times[-1]}]")
     tr = {name: _sample(times, val, grid).tolist() for name, val in traj.items()}
-    inds = sorted(set([0, num_frames - 1] + list(range(0, num_frames, int(hand_stride)))))
+    source = json.loads(Path(plan_path).read_text(encoding="utf8"))
+    schedule = source.get("scheduling", {})
+    gains = None
+    if "reach_gain" in schedule:
+        values = np.asarray(schedule["reach_gain"], dtype=float)
+        if values.shape != times.shape or not np.isfinite(values).all() or np.any((values < 0) | (values > 1)):
+            raise ValueError("scheduling.reach_gain must be finite [0,1] per source sample")
+        gains = np.interp(grid, times, values)
+    if no_hand:
+        start_index = num_frames
+    elif hand_start_s is not None:
+        if hand_start_s < 0 or not math.isfinite(hand_start_s):
+            raise ValueError("hand_start_s must be finite nonnegative")
+        start_index = min(num_frames, int(math.ceil((hand_start_s - 1e-8) * fps)))
+    elif gains is not None:
+        active = np.flatnonzero(gains >= hand_gate_threshold)
+        # Activation latches after first threshold crossing, even if vision jitters.
+        start_index = int(active[0]) if len(active) else num_frames
+    else:
+        start_index = 0
+    if start_index < num_frames:
+        inds = sorted(set([start_index, num_frames - 1] +
+                          list(range(start_index, num_frames, int(hand_stride)))))
+    else:
+        inds = []
+    root_inds = sorted(set([0, num_frames-1] + list(range(0, num_frames, int(root_stride)))))
+    if start_index < num_frames:
+        root_inds = sorted(set(root_inds + [start_index]))
     obj = {
         "schema_version": "soma_task_targets/v1",
         "source_plan": str(plan_path),
@@ -75,9 +110,13 @@ def prepare(plan_path, output_path, fps=30.0, start_s=0.0, duration_s=4.0,
         "start_in_source_s": float(start_s),
         "time_s": (np.arange(num_frames) / float(fps)).tolist(),
         "right_hand_frame_indices": inds,
+        "root_frame_indices": root_inds,
+        "phase_split_frame": (start_index if 0 < start_index < num_frames else None),
+        "reach_gain": gains.tolist() if gains is not None else None,
         "trajectories": tr,
         "notes": [
             "Positions and quaternions are intermediate targets, NOT native KiMoDo JSON.",
+            "No hand constraints are supplied before the first activated frame.",
             "Planned hand-tip offset is not automatically the SOMA RightHandMiddleEnd offset.",
         ],
     }
@@ -95,9 +134,17 @@ def main():
     p.add_argument("--start", type=float, default=0.0)
     p.add_argument("--duration", type=float, default=4.0)
     p.add_argument("--hand-stride", type=int, default=12)
+    p.add_argument("--root-stride", type=int, default=1, help="1=dense root, 15=one root waypoint per 0.5s at 30Hz")
+    p.add_argument("--hand-gate-threshold", type=float, default=0.6)
+    p.add_argument("--hand-start-s", type=float, default=None, help="Override scheduling activation relative to exported clip start")
+    p.add_argument("--no-hand", action="store_true", help="Pure root-only walking ablation")
     a = p.parse_args()
-    res = prepare(a.plan, a.out, a.fps, a.start, a.duration, a.hand_stride)
-    print(f"Prepared {res['num_frames']} frames, {len(res['right_hand_frame_indices'])} right-hand keyframes: {a.out}")
+    res = prepare(a.plan, a.out, a.fps, a.start, a.duration, a.hand_stride,
+                  hand_gate_threshold=a.hand_gate_threshold, hand_start_s=a.hand_start_s,
+                  root_stride=a.root_stride, no_hand=a.no_hand)
+    print(f"Prepared {res['num_frames']} frames, {len(res['root_frame_indices'])} root waypoints, "
+          f"{len(res['right_hand_frame_indices'])} right-hand keyframes, "
+          f"phase split={res['phase_split_frame']}: {a.out}")
 
 if __name__ == "__main__":
     main()

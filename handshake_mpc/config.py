@@ -43,18 +43,31 @@ class MPCConfig:
     target_prediction_cap_s: float = 0.6
     feasibility_tolerance: float = 2e-5
     solver_max_iterations: int = 150
+    # V2 is opt-in: old configs and tests preserve their original behavior.
+    gain_schedule_enabled: bool = False
+    reach_gate_far_m: float = 2.0
+    reach_gate_near_m: float = 1.2
+    human_standoff_m: float = 0.85
+    pelvis_goal_weight: float = 230.0
+    terminal_pelvis_goal_weight: float = 600.0
+    neutral_wrist_weight: float = 450.0
 
     def __post_init__(self):
         positive = ["dt_s", "pelvis_height_m", "max_pelvis_wrist_distance_m",
                     "pelvis_speed_max_mps", "wrist_speed_max_mps",
                     "pelvis_acceleration_max_mps2", "wrist_acceleration_max_mps2",
-                    "precontact_scale_m", "max_target_age_s", "feasibility_tolerance"]
+                    "precontact_scale_m", "max_target_age_s", "feasibility_tolerance",
+                    "reach_gate_far_m", "reach_gate_near_m", "human_standoff_m"]
         nonnegative = [name for name in asdict(self) if name.endswith("weight")]
         nonnegative.append("target_prediction_cap_s")
         for name in positive + nonnegative:
             value = getattr(self, name)
             if not math.isfinite(value) or value < 0 or (name in positive and value == 0):
                 raise ValueError(f"Invalid {name}: {value}")
+        if self.reach_gate_near_m >= self.reach_gate_far_m:
+            raise ValueError("reach_gate_near_m must be below reach_gate_far_m")
+        if not isinstance(self.gain_schedule_enabled, bool):
+            raise ValueError("gain_schedule_enabled must be boolean")
         if not math.isfinite(self.fixed_heading_rad):
             raise ValueError("fixed_heading_rad must be finite")
         if not isinstance(self.horizon_steps, int) or self.horizon_steps < 2:

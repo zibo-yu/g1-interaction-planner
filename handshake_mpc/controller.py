@@ -12,6 +12,21 @@ class MPCSolveError(RuntimeError):
     """No valid plan was produced. Caller must not execute a failed horizon."""
 
 
+def smooth_reach_gain(distance_m: float, near_m: float, far_m: float) -> float:
+    """C1-continuous 0 (far) -> 1 (near) distance schedule."""
+    s = float(np.clip((far_m - distance_m) / (far_m - near_m), 0., 1.))
+    return s * s * (3. - 2. * s)
+
+
+def stopping_root_goal(pelvis_xz: np.ndarray, human_xz: np.ndarray, standoff_m: float) -> np.ndarray:
+    """Project a stop point along the current robot-to-human approach line."""
+    delta = human_xz - pelvis_xz
+    norm = float(np.linalg.norm(delta))
+    if norm < 1e-8:
+        return pelvis_xz.copy()  # No well-defined approach bearing.
+    return human_xz - standoff_m * delta / norm
+
+
 def braking_path(position, velocity, acceleration_limit, dt, steps):
     """Straight-line bounded deceleration, then exact position hold."""
     p = np.empty((len(position), steps + 1))
@@ -61,6 +76,16 @@ class HandshakeMPC:
         self.sqrt_wrist_velocity_weight = cp.Parameter(nonneg=True)
         self.weighted_wrist_velocity_target = cp.Parameter((3, n + 1))
         self.sqrt_comfort_weight = cp.Parameter(nonneg=True)
+        self.sqrt_hand_tracking_weight = cp.Parameter(nonneg=True)
+        self.sqrt_hand_terminal_weight = cp.Parameter(nonneg=True)
+        self.sqrt_neutral_wrist_weight = cp.Parameter(nonneg=True)
+        self.sqrt_pelvis_goal_weight = cp.Parameter(nonneg=True)
+        self.sqrt_pelvis_terminal_weight = cp.Parameter(nonneg=True)
+        # Pre-multiplied targets prevent parameter*parameter products (DPP).
+        self.weighted_hand_target = cp.Parameter((3, n + 1))
+        self.weighted_hand_terminal_target = cp.Parameter(3)
+        self.weighted_pelvis_goal = cp.Parameter(2)
+        self.weighted_pelvis_terminal_goal = cp.Parameter(2)
         ground_lift = np.array([[1., 0.], [0., 0.], [0., 1.]])
         relative = self.P[2:, :] - ground_lift @ self.P[:2, :] - np.array([[0.], [c.pelvis_height_m], [0.]])
         local_relative = self.body_rotation.T @ relative
@@ -87,13 +112,21 @@ class HandshakeMPC:
             delta_comfort <= half + self.slack,
             -delta_comfort <= half + self.slack,
         ]
-        hand_error = self.P[2:, :] - self.target_wrist
+        neutral_offset_world = self.body_rotation @ np.asarray(c.neutral_wrist_local_m)
+        neutral_error = relative - neutral_offset_world.reshape(3, 1)
         acceleration_change = cp.hstack([
             self.A[:, 0:1] - cp.reshape(self.previous_acceleration, (5, 1), order="F"),
             self.A[:, 1:] - self.A[:, :-1]])
         objective = (
-            dt * c.hand_tracking_weight * cp.sum_squares(hand_error[:, 1:])
-            + c.terminal_hand_tracking_weight * cp.sum_squares(hand_error[:, -1])
+            dt * cp.sum_squares(self.sqrt_hand_tracking_weight * self.P[2:, 1:]
+                                 - self.weighted_hand_target[:, 1:])
+            + cp.sum_squares(self.sqrt_hand_terminal_weight * self.P[2:, -1]
+                             - self.weighted_hand_terminal_target)
+            + dt * cp.sum_squares(self.sqrt_neutral_wrist_weight * neutral_error[:, 1:])
+            + dt * cp.sum_squares(self.sqrt_pelvis_goal_weight * self.P[:2, 1:]
+                                 - cp.reshape(self.weighted_pelvis_goal, (2, 1), order="F"))
+            + cp.sum_squares(self.sqrt_pelvis_terminal_weight * self.P[:2, -1]
+                             - self.weighted_pelvis_terminal_goal)
             + dt * cp.sum_squares(self.sqrt_comfort_weight * self.slack[:, 1:])
             + dt * c.pelvis_displacement_weight * cp.sum_squares(
                 self.P[:2, 1:] - cp.reshape(self.body_anchor, (2, 1), order="F"))
@@ -155,6 +188,14 @@ class HandshakeMPC:
         upper = np.tile((p0 + travel)[:, None], (1, n + 1))
         target_velocity = np.zeros((3, n + 1))
         gate = 0.0
+        reach_gain = 1.0
+        human_distance = None
+        root_goal = p0[:2].copy()
+        neutral_weight = 0.0
+        root_goal_weight = 0.0
+        root_terminal_weight = 0.0
+        hand_weight = c.hand_tracking_weight
+        hand_terminal_weight = c.terminal_hand_tracking_weight
         if self._command == "active":
             if target is None:
                 raise ValueError("An active handshake requires a fresh HandshakeTarget")
@@ -165,16 +206,41 @@ class HandshakeMPC:
                 raise ValueError("Target timestamp is in the future or stale; no valid plan produced")
             if target.wrist_orientation_xyzw is not None and not same_orientation(target.wrist_orientation_xyzw, self.wrist_q):
                 raise ValueError("Stage 1 cannot change wrist orientation; choose matching fixed configuration")
-            lead = np.minimum(np.maximum(age, 0) + np.arange(n + 1) * dt, c.target_prediction_cap_s)
-            target_tip = target.hand_tip_position_m[:, None] + target.hand_tip_velocity_mps[:, None] * lead
-            wrist_target = target_tip - self.tip_offset_world[:, None]
-            # Predicted velocity is zero beyond the capped constant-velocity forecast.
-            moving = (np.maximum(age, 0) + np.arange(n + 1) * dt) < c.target_prediction_cap_s
-            target_velocity[:, moving] = target.hand_tip_velocity_mps[:, None]
-            distance = np.linalg.norm(state.right_wrist_position_m + self.tip_offset_world - target_tip[:, 0])
-            gate = float(np.exp(-0.5 * (distance / c.precontact_scale_m)**2))
+            if c.gain_schedule_enabled:
+                if target.human_torso_position_m is None:
+                    raise ValueError("Gain-scheduled MPC requires observed human_torso_position_m")
+                human_xz = target.human_torso_position_m[[0, 2]]
+                human_distance = float(np.linalg.norm(human_xz - p0[:2]))
+                reach_gain = smooth_reach_gain(human_distance, c.reach_gate_near_m, c.reach_gate_far_m)
+                root_goal = stopping_root_goal(p0[:2], human_xz, c.human_standoff_m)
+                hand_weight *= reach_gain
+                hand_terminal_weight *= reach_gain
+                neutral_weight = (1. - reach_gain) * c.neutral_wrist_weight
+                root_goal_weight = c.pelvis_goal_weight
+                root_terminal_weight = c.terminal_pelvis_goal_weight
+            if target.hand_tip_position_m is None:
+                if not c.gain_schedule_enabled or reach_gain > 0:
+                    raise ValueError("Hand-tip observation is required once the reach gain is positive")
+                # The hand is unobserved during root-only walking. The zero-weight
+                # target is a placeholder; the neutral-relative wrist cost applies.
+                wrist_target = np.repeat(state.right_wrist_position_m[:, None], n+1, axis=1)
+                distance = np.inf
+                gate = 0.0
+            else:
+                lead = np.minimum(np.maximum(age, 0) + np.arange(n + 1) * dt, c.target_prediction_cap_s)
+                target_tip = target.hand_tip_position_m[:, None] + target.hand_tip_velocity_mps[:, None] * lead
+                wrist_target = target_tip - self.tip_offset_world[:, None]
+                moving = (np.maximum(age, 0) + np.arange(n + 1) * dt) < c.target_prediction_cap_s
+                target_velocity[:, moving] = target.hand_tip_velocity_mps[:, None]
+                distance = np.linalg.norm(state.right_wrist_position_m + self.tip_offset_world - target_tip[:, 0])
+                gate = float(np.exp(-0.5 * (distance / c.precontact_scale_m)**2))
             velocity_weight = c.wrist_velocity_far_weight + (c.wrist_velocity_near_weight - c.wrist_velocity_far_weight) * gate
             comfort_weight = c.comfort_weight
+            if c.gain_schedule_enabled:
+                comfort_weight *= reach_gain
+                velocity_weight = c.wrist_velocity_far_weight + reach_gain * (
+                    velocity_weight - c.wrist_velocity_far_weight)
+                target_velocity *= reach_gain
         else:
             root_path, _ = braking_path(p0[:2], v0[:2], c.pelvis_acceleration_max_mps2, dt, n)
             lower[:2, :], upper[:2, :] = root_path, root_path
@@ -192,6 +258,15 @@ class HandshakeMPC:
         self.sqrt_wrist_velocity_weight.value = np.sqrt(velocity_weight)
         self.weighted_wrist_velocity_target.value = np.sqrt(velocity_weight) * target_velocity
         self.sqrt_comfort_weight.value = np.sqrt(comfort_weight)
+        self.sqrt_hand_tracking_weight.value = np.sqrt(hand_weight)
+        self.sqrt_hand_terminal_weight.value = np.sqrt(hand_terminal_weight)
+        self.sqrt_neutral_wrist_weight.value = np.sqrt(neutral_weight)
+        self.sqrt_pelvis_goal_weight.value = np.sqrt(root_goal_weight)
+        self.sqrt_pelvis_terminal_weight.value = np.sqrt(root_terminal_weight)
+        self.weighted_hand_target.value = np.sqrt(hand_weight) * wrist_target
+        self.weighted_hand_terminal_target.value = np.sqrt(hand_terminal_weight) * wrist_target[:, -1]
+        self.weighted_pelvis_goal.value = np.sqrt(root_goal_weight) * root_goal
+        self.weighted_pelvis_terminal_goal.value = np.sqrt(root_terminal_weight) * root_goal
         started = time.perf_counter()
         try:
             self.problem.solve(solver="CLARABEL", warm_start=True, max_iter=c.solver_max_iterations,
@@ -220,6 +295,10 @@ class HandshakeMPC:
             "iterations": self.problem.solver_stats.num_iters,
             "objective": float(self.problem.value), "max_constraint_violation": max_violation,
             "precontact_gate": gate, "wrist_velocity_weight": float(velocity_weight),
+            "gain_schedule_enabled": c.gain_schedule_enabled,
+            "reach_gain": float(reach_gain if self._command == "active" else 0.0),
+            "human_torso_distance_m": human_distance,
+            "pelvis_goal_xz_m": root_goal.tolist(),
             "max_predicted_pelvis_wrist_distance_m": float(np.max(np.linalg.norm(self.relative.value, axis=0))),
             "max_reach_bezier_control_distance_m": float(np.max(np.linalg.norm(self.bezier_middle.value, axis=0))),
             "max_comfort_violation_m": float(np.max(np.maximum(

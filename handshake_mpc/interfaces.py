@@ -31,18 +31,23 @@ class RobotState:
 class HandshakeTarget:
     """Desired ROBOT hand-tip pose, not an unconverted observed human palm."""
     timestamp_s: float
-    hand_tip_position_m: np.ndarray
+    hand_tip_position_m: np.ndarray | None
     hand_tip_velocity_mps: np.ndarray = field(default_factory=lambda: np.zeros(3))
     wrist_orientation_xyzw: np.ndarray | None = None
+    # Required when gain_schedule_enabled; camera-derived human torso in planner world.
+    human_torso_position_m: np.ndarray | None = None
     frame_id: str = "planner_world"
 
     def __post_init__(self):
         if not math.isfinite(self.timestamp_s):
             raise ValueError("timestamp_s must be finite")
-        self.hand_tip_position_m = vector(self.hand_tip_position_m, 3, "hand_tip_position_m")
+        if self.hand_tip_position_m is not None:
+            self.hand_tip_position_m = vector(self.hand_tip_position_m, 3, "hand_tip_position_m")
         self.hand_tip_velocity_mps = vector(self.hand_tip_velocity_mps, 3, "hand_tip_velocity_mps")
         if self.wrist_orientation_xyzw is not None:
             self.wrist_orientation_xyzw = quaternion(self.wrist_orientation_xyzw)
+        if self.human_torso_position_m is not None:
+            self.human_torso_position_m = vector(self.human_torso_position_m, 3, "human_torso_position_m")
 
     @classmethod
     def from_human_palm(cls, *, timestamp_s, human_palm_position_m,
